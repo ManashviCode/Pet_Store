@@ -1,9 +1,12 @@
 #github action to deploy pet store to azure
 
-name: Deploy pet Store
+name: Deploy pet Store api
 
 on:
   workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: "pet-backend20240627113013"
 
 jobs:
   build:
@@ -20,3 +23,16 @@ jobs:
 
     - name: Build
       run: dotnet build ./pet-backend/pet-backend.csproj --configuration Release --no-restore
+
+
+    # publish
+    - name: Publish
+      run: dotnet publish ./pet-backend/pet-backend.csproj --configuration Release --output ./publish
+
+    # deploy to azure
+    - name: Deploy to Azure
+      uses: azure/webapps-deploy@v3
+      with:
+        app_name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.API_PUBLISH_SECRET }}
+        package: ./publish 
